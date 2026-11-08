@@ -23,3 +23,27 @@ $('import-btn').onclick=()=>$('import-file').click();$('import-file').onchange=a
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){const now=new Date();if(dateKey(now.getFullYear(),now.getMonth()+1,now.getDate())!==dateKey(today.getFullYear(),today.getMonth()+1,today.getDate())){today.setTime(now.getTime());year=now.getFullYear();month=now.getMonth()+1;selected=now.getDate();view='month';render()}}});
 load().catch(()=>showToast('無法開啟本機資料庫，請使用 Chrome 瀏覽器'));
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+function askDelete(name) {
+  return new Promise(resolve => {
+    const dialog = document.getElementById('delete-dialog');
+    const cancel = document.getElementById('delete-cancel');
+    const confirm = document.getElementById('delete-confirm');
+
+    document.getElementById('delete-message').textContent =
+      `確定要刪除「${name}」嗎？`;
+
+    function finish(result) {
+      dialog.close();
+      resolve(result);
+    }
+
+    cancel.onclick = () => finish(false);
+    confirm.onclick = () => finish(true);
+    dialog.oncancel = event => {
+      event.preventDefault();
+      finish(false);
+    };
+
+    dialog.showModal();
+  });
+}
