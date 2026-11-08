@@ -11,4 +11,45 @@
 <input id="camera" type="file" accept="image/*"
        capture="environment" hidden>
 
-<input id="photo" type="file" accept="image/*" hidden></label><img id="preview" class="hidden" alt="照片預覽"><div class="actions"><button type="button" id="cancel">取消</button><button type="submit" class="primary">儲存紀錄</button></div></form></dialog><div id="toast" role="status"></div><script src="app.js?v=3"></script></body></html><div/>
+<input id="photo" type="file" accept="image/*" hidden></label><img id="preview" class="hidden" alt="照片預覽"><div class="actions"><button type="button" id="cancel">取消</button><button type="submit" class="primary">儲存紀錄</button></div></form></dialog><div id="toast" role="status"></div><script src="app.js?v=3"></script><dialog id="delete-dialog" class="delete-dialog">
+  <h2>🌿 日日斷捨離</h2>
+  <p id="delete-message"></p>
+  <p style="color:#777;font-size:14px">
+    刪除後將無法復原。
+  </p>
+  <div class="delete-actions">
+    <button type="button" id="delete-cancel">取消</button>
+    <button type="button" id="delete-confirm">確認刪除</button>
+  </div>
+</dialog>
+
+<style>
+.delete-dialog {
+  border: none;
+  border-radius: 20px;
+  padding: 28px;
+  width: min(85vw, 380px);
+  box-sizing: border-box;
+  background: #fff;
+  color: #344038;
+}
+.delete-dialog::backdrop {
+  background: rgba(0,0,0,.45);
+}
+.delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+.delete-actions button {
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+#delete-confirm {
+  background: #718F79;
+  color: white;
+  border: none;
+}
+</style></body></html><div/>
