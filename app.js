@@ -1,6 +1,6 @@
 'use strict';
 const $=id=>document.getElementById(id), today=new Date(), pad=n=>String(n).padStart(2,'0');
-let year=2027,month=1,selected=1,view='month',records=[];
+let year=today.getFullYear(),month=today.getMonth()+1,selected=today.getDate(),view='month',records=[];
 const dateKey=(y,m,d)=>`${y}-${pad(m)}-${pad(d)}`;
 const dbPromise=new Promise((resolve,reject)=>{const req=indexedDB.open('declutter-diary-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('records',{keyPath:'id'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
 async function tx(mode,fn){const db=await dbPromise;return new Promise((resolve,reject)=>{const t=db.transaction('records',mode),s=t.objectStore('records');let result;try{result=fn(s)}catch(e){reject(e);return}t.oncomplete=()=>resolve(result);t.onerror=()=>reject(t.error)})}
