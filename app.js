@@ -47,3 +47,12 @@ function askDelete(name) {
     dialog.showModal();
   });
 }
+
+/* 日日斷捨離：PWA 安裝統計 */
+window.addEventListener('appinstalled', () => {
+  if (typeof gtag === 'function') {
+    gtag('event', 'pwa_install', {
+      install_method: 'browser'
+    });
+  }
+});
