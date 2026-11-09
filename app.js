@@ -16,7 +16,23 @@ function renderRecords(){$('all-entries').replaceChildren();const items=[...reco
 function shiftMonth(n){month+=n;if(month<1){month=12;year--}if(month>12){month=1;year++}selected=1;render()}$('prev').onclick=()=>shiftMonth(-1);$('next').onclick=()=>shiftMonth(1);$('year-prev').onclick=()=>{year--;render()};$('year-next').onclick=()=>{year++;render()};
 $('add').onclick=()=>{$('entry-form').reset();$('date').value=dateKey(year,month,selected);$('preview').classList.add('hidden');$('dialog').showModal()};$('cancel').onclick=()=>$('dialog').close();
 function compress(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(reader.error);reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('無法讀取照片'));img.onload=()=>{const max=1200,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.76))};img.src=reader.result};reader.readAsDataURL(file)})}
-$('photo').onchange=async()=>{const f=$('photo').files?.[0];if(!f)return;try{const data=await compress(f);$('preview').src=data;$('preview').classList.remove('hidden')}catch(e){showToast(e.message)}};
+
+async function handlePhoto(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  try {
+    const data = await compress(file);
+    $('preview').src = data;
+    $('preview').classList.remove('hidden');
+  } catch (error) {
+    showToast('照片讀取失敗：' + error.message);
+  }
+}
+
+$('photo').onchange = handlePhoto;
+$('camera').onchange = handlePhoto;
+
 $('entry-form').onsubmit=async e=>{e.preventDefault();const name=$('name').value.trim(),date=$('date').value;if(!name||!/^\d{4}-\d{2}-\d{2}$/.test(date))return;const photo=$('preview').classList.contains('hidden')?null:$('preview').src;const meaning=$('meaning').value.trim();const r={id:crypto.randomUUID(),name,meaning,date,photo,createdAt:new Date().toISOString()};try{await tx('readwrite',s=>s.put(r));$('dialog').close();const [y,m,d]=date.split('-').map(Number);year=y;month=m;selected=d;view='month';await load();showToast('已儲存，今天也放下一件 🌿')}catch(err){showToast('儲存失敗，請檢查手機儲存空間')}};
 $('export').onclick=async()=>{await load();const blob=new Blob([JSON.stringify({app:'declutter-diary',version:1,exportedAt:new Date().toISOString(),records},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download=`日日斷捨離備份_${dateKey(today.getFullYear(),today.getMonth()+1,today.getDate())}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);showToast('備份已下載，請妥善保存')};
 $('import-btn').onclick=()=>$('import-file').click();$('import-file').onchange=async()=>{const file=$('import-file').files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.app!=='declutter-diary'||!Array.isArray(data.records)||data.records.length>10000||!data.records.every(r=>typeof r.id==='string'&&typeof r.name==='string'&&(r.meaning===undefined||typeof r.meaning==='string')&&/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&(!r.photo||(typeof r.photo==='string'&&r.photo.startsWith('data:image/')))))throw Error('備份格式不正確');if(!confirm(`匯入 ${data.records.length} 筆紀錄？相同 ID 的紀錄會更新。`))return;await tx('readwrite',s=>data.records.forEach(r=>s.put(r)));await load();showToast('備份匯入成功')}catch(e){showToast('匯入失敗：'+e.message)}finally{$('import-file').value=''}};
